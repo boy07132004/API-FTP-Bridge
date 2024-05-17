@@ -13,12 +13,14 @@ class ZM_FTP(FTP):
         super().__init__(host)
         self.login(user=username, passwd=passwd)
 
-    def write_recipe(self, recipe, filename="default_name"):
+    def write_recipe(self, recipe, filename="default_name.txt"):
         _filename = self.path + filename
         content_bytes = recipe.encode('utf-8')
 
-        with self.storbinary(f'STOR {_filename}', fp=io.BytesIO(content_bytes)) as response:
-            if response.startswith('226'):
-                logging.info("File uploaded successfully.")
-            else:
-                logging.error("Error uploading file.")
+        response = self.storbinary(
+            f'STOR {_filename}', fp=io.BytesIO(content_bytes))
+
+        if response.startswith('226'):
+            logging.info("File uploaded successfully.")
+        else:
+            logging.error("Error uploading file.")
