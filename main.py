@@ -3,9 +3,11 @@ from core import config
 from core import zm_ftp_lib
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 import paho.mqtt.client as mqtt
 
 CONFIG = config.load_config("core/config.ini")
+LOG_FILE = "cvd.log"
 FTP = zm_ftp_lib.ZM_FTP(CONFIG)
 
 MQTT_BROKER = CONFIG["MQTT"]["MQTT_BROKER"]
@@ -40,7 +42,17 @@ def on_message(client, userdata, msg):
 
 if __name__ == "__main__":
     # logging init
+    from logging.handlers import RotatingFileHandler
 
+    logHandler = RotatingFileHandler(LOG_FILE, mode="a", maxBytes=10*1024*1024,
+                                     backupCount=2, encoding=None, delay=0)
+    logFormatter = logging.Formatter(
+        "%(asctime)s %(levelname)s -> %(message)s")
+    logHandler.setFormatter(logFormatter)
+    logHandler.setLevel(logging.INFO)
+    meshLog = logging.getLogger("root")
+    meshLog.setLevel(logging.INFO)
+    meshLog.addHandler(logHandler)
     # mqtt init
     mqttc = mqtt.Client()
     mqttc.on_connect = on_connect
