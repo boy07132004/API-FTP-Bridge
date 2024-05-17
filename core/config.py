@@ -10,10 +10,10 @@ def load_config(path: str):
             _config.read_file(config_file)
 
     except FileNotFoundError:
-        logging.error(f"Configuration file not found: {path}")
+        logging.error("Configuration file not found: " + path)
         raise
     except Exception as e:
-        logging.error(f"Error reading configuration file: {path}, {e}")
+        logging.error("Error reading configuration file: " + path)
         raise
 
     return _config
