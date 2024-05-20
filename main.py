@@ -25,14 +25,15 @@ def on_connect(client, userdata, flags, reason_code=None, properties=None):
 
 
 def on_message(client, userdata, msg):
-    logging.info(msg.topic + " " + msg.payload.decode())
     # parse message
     try:
-        recipe = json.loads(msg.payload.decode())
+        msg_decoded = msg.payload.decode()
+        logging.info(msg.topic+" " + msg_decoded)
+        recipe = json.loads(msg_decoded)
         if check_recipe_format(recipe) is False:
             raise ValueError("Recipe check failed")
 
-        FTP.write_recipe(msg.payload.decode())
+        FTP.write_recipe(msg_decoded)
 
     except Exception as e:
         logging.warning("Recipe load error ")
