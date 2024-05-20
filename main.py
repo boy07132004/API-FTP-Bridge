@@ -20,20 +20,20 @@ def check_recipe_format(recipe):
     return True
 
 
-def on_connect(client, userdata, flags, reason_code, properties):
+def on_connect(client, userdata, flags, reason_code, properties=""):
     client.subscribe(MQTT_TOPIC)
 
 
 def on_message(client, userdata, msg):
-    logging.info(msg.topic+" "+str(msg.payload))
-
     # parse message
     try:
-        recipe = json.loads(msg)
+        msg_decoded = msg.payload.decode()
+        logging.info(msg.topic+" " + msg_decoded)
+        recipe = json.loads(msg_decoded)
         if check_recipe_format(recipe) is False:
             raise ValueError("Recipe check failed")
 
-        FTP.write_recipe(msg)
+        FTP.write_recipe(msg_decoded)
 
     except Exception as e:
         logging.warning(f"Recipe load error {e}")
