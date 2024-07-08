@@ -8,7 +8,6 @@ import paho.mqtt.client as mqtt
 
 CONFIG = config.load_config("core/config.ini")
 LOG_FILE = "cvd.log"
-FTP = zm_ftp_lib.ZM_FTP(CONFIG)
 
 MQTT_BROKER = CONFIG["MQTT"]["MQTT_BROKER"]
 MQTT_USER = CONFIG["MQTT"]["MQTT_USER"]
@@ -28,7 +27,7 @@ def on_message(client, userdata, msg):
     # parse message
     try:
         msg_decoded = msg.payload.decode()
-        logging.info(msg.topic+" " + msg_decoded)
+        meshLog.info(msg.topic+" " + msg_decoded)
         recipe = json.loads(msg_decoded)
         if check_recipe_format(recipe) is False:
             raise ValueError("Recipe check failed")
@@ -36,7 +35,7 @@ def on_message(client, userdata, msg):
         FTP.write_recipe(msg_decoded)
 
     except Exception as e:
-        logging.warning("Recipe load error ")
+        meshLog.warning("Recipe load error ")
         return
 
 
@@ -48,9 +47,16 @@ if __name__ == "__main__":
         "%(asctime)s %(levelname)s -> %(message)s")
     logHandler.setFormatter(logFormatter)
     logHandler.setLevel(logging.INFO)
-    meshLog = logging.getLogger("root")
-    meshLog.setLevel(logging.INFO)
+    
+    meshLog = logging.getLogger("mesh")
+    meshLog.setLevel(logging.WARNING)
     meshLog.addHandler(logHandler)
+
+    ftpLog = logging.getLogger("ftp")
+    ftpLog.setLevel(logging.WARNING)
+    ftpLog.addHandler(logHandler)
+
+    FTP = zm_ftp_lib.ZM_FTP(CONFIG, ftpLog)
 
     # mqtt init
     mqttc = mqtt.Client()

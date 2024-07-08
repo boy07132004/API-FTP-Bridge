@@ -1,14 +1,13 @@
 from ftplib import FTP
 import io
-import logging
-
 
 class ZM_FTP(FTP):
-    def __init__(self, config):
+    def __init__(self, config, logger):
         host = config["FTP"]["FTP_SERVER"]
         username = config["FTP"]["FTP_USER"]
         passwd = config["FTP"]["FTP_PASSWD"]
         self.path = config["FTP"]["FOLDER_PATH"]
+        self.logger = logger
 
         # remove the end slash
         if len(self.path) > 0 and self.path[-1] == "/":
@@ -31,7 +30,7 @@ class ZM_FTP(FTP):
                     self.cwd(path)
 
         else:
-            print("Please input remote path.")
+            self.logger.warning("Please input remote path.")
 
     def write_recipe(self, recipe, filename="default_name.txt"):
         _path =  self.rootPath + self.path 
@@ -44,6 +43,6 @@ class ZM_FTP(FTP):
             'STOR ' + _filename, fp=io.BytesIO(content_bytes))
 
         if response.startswith('226'):
-            logging.info("File uploaded successfully.")
+            self.logger.info("File uploaded successfully.")
         else:
-            logging.error("Error uploading file.")
+            self.logger.error("Error uploading file.")
