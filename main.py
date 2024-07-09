@@ -1,56 +1,86 @@
+from flask import Flask, jsonify
 from configparser import ConfigParser
 from core import config
 from core import zm_ftp_lib
-import json
+
 import logging
 from logging.handlers import RotatingFileHandler
-import paho.mqtt.client as mqtt
+
 
 CONFIG = config.load_config("core/config.ini")
 LOG_FILE = "cvd.log"
-
-MQTT_BROKER = CONFIG["MQTT"]["MQTT_BROKER"]
-MQTT_USER = CONFIG["MQTT"]["MQTT_USER"]
-MQTT_PASSWD = CONFIG["MQTT"]["MQTT_PASSWD"]
-MQTT_TOPIC = CONFIG["MQTT"]["TOPIC"]
+app = Flask(__name__)
 
 
-def check_recipe_format(recipe):
-    return True
+@app.route('/get_recipe_list')
+def get_recipe_list():
+    """
+    get recipe name from ftp ls
+    """
+    ret = {}
+    return jsonify(ret)
 
 
-def on_connect(client, userdata, flags, reason_code=None, properties=None):
-    client.subscribe(MQTT_TOPIC)
+@app.route('/get_recipes')
+def get_recipes():
+    """
+    input:
+        ["a", "b"]
+    output:
+        {
+            "a": [
+                "a.proc": "",
+                "a.proc1": "",
+                "a.hdr": ""
+            ],
+        }
+    """
+    ret = {}
+    return jsonify(ret)
 
 
-def on_message(client, userdata, msg):
-    # parse message
-    try:
-        msg_decoded = msg.payload.decode()
-        meshLog.info(msg.topic+" " + msg_decoded)
-        recipe = json.loads(msg_decoded)
-        if check_recipe_format(recipe) is False:
-            raise ValueError("Recipe check failed")
+@app.route('/write_back')
+def write_back():
+    """
+    func:
+        backup -> write
+    input:
+        {
+            "a": [
+                "a.proc": "",
+                "a.proc1": "",
+                "a.hdr": ""
+            ],
+        }
+    output:
+        200
+    """
+    ret = {}
+    return jsonify(ret)
 
-        FTP.write_recipe(msg_decoded)
 
-    except Exception as e:
-        meshLog.warning("Recipe load error ")
-        return
+@app.route('/recover')
+def recover():
+    """
+    func:
+        backup_file -> recipe
+    input:
+        get ["a", "b"] -> ret current backup file content
+        post ["a", "b"] -> recover
+    output:
+        200
+    """
+    ret = {"status": "OK"}
+    return jsonify(ret)
 
 
 if __name__ == "__main__":
-    # logging init
     logHandler = RotatingFileHandler(LOG_FILE, mode="a", maxBytes=10*1024*1024,
                                      backupCount=2, encoding=None, delay=0)
     logFormatter = logging.Formatter(
         "%(asctime)s %(levelname)s -> %(message)s")
     logHandler.setFormatter(logFormatter)
     logHandler.setLevel(logging.INFO)
-    
-    meshLog = logging.getLogger("mesh")
-    meshLog.setLevel(logging.WARNING)
-    meshLog.addHandler(logHandler)
 
     ftpLog = logging.getLogger("ftp")
     ftpLog.setLevel(logging.WARNING)
@@ -58,12 +88,5 @@ if __name__ == "__main__":
 
     FTP = zm_ftp_lib.ZM_FTP(CONFIG, ftpLog)
 
-    # mqtt init
-    mqttc = mqtt.Client()
-    mqttc.on_connect = on_connect
-    mqttc.on_message = on_message
-    mqttc.username_pw_set(MQTT_USER, MQTT_PASSWD)
-    mqttc.connect(MQTT_BROKER, 1883, 60)
-
-    mqttc.loop_forever()
+    app.run()
     FTP.quit()

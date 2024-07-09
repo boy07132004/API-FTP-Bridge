@@ -1,1 +1,6 @@
-paho-mqtt==0.9
+markupsafe>==0.23
+Jinja2==2.10
+click==5.1
+itsdangerous==0.24
+werkzeug==0.14
+flask==1.0.3
