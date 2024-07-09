@@ -1,6 +1,7 @@
 from ftplib import FTP
 import io
 
+
 class ZM_FTP(FTP):
     def __init__(self, config, logger):
         host = config["FTP"]["FTP_SERVER"]
@@ -33,9 +34,9 @@ class ZM_FTP(FTP):
             self.logger.warning("Please input remote path.")
 
     def write_recipe(self, recipe, filename="default_name.txt"):
-        _path =  self.rootPath + self.path 
+        _path = self.rootPath + self.path
         self.ftp_path_chk(_path)
-        
+
         _filename = _path + '/' + filename
         content_bytes = recipe.encode('utf-8')
 
@@ -46,3 +47,13 @@ class ZM_FTP(FTP):
             self.logger.info("File uploaded successfully.")
         else:
             self.logger.error("Error uploading file.")
+
+    def list_all_recipe(self):
+        ret = set()
+        file_list = self.nlst()
+
+        for filename in file_list:
+            recipe = filename.split(".")[0]
+            ret.add(recipe)
+
+        return list(ret)

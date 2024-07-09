@@ -14,10 +14,8 @@ app = Flask(__name__)
 
 @app.route('/get_recipe_list')
 def get_recipe_list():
-    """
-    get recipe name from ftp ls
-    """
-    ret = {}
+    ret = FTP.list_all_recipe()
+
     return jsonify(ret)
 
 
