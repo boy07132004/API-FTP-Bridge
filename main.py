@@ -103,8 +103,8 @@ def create_recipes():
     return jsonify(ret)
 
 
-@app.route('/recover', methods=['POST'])
-def recover():
+@app.route('/restore', methods=['POST'])
+def restore():
     """
     input:
         {
@@ -114,18 +114,18 @@ def recover():
     ret = []
     recipe_already_backup = FTP.list_recipe_from_path(BACKUP_FOLDER)
 
-    recover_list = request.get_json().get("recipes", [])
-    recover_list_checked = []
+    restore_list = request.get_json().get("recipes", [])
+    restore_list_checked = []
 
-    for recipe in recover_list:
+    for recipe in restore_list:
         if recipe in recipe_already_backup:
-            recover_list_checked.append(recipe)
+            restore_list_checked.append(recipe)
         else:
             ret.append(recipe + " not found")
 
-    recover_content = FTP.get_recipes_content_from_path(
-        recover_list_checked, BACKUP_FOLDER)
-    ret.extend(FTP.write_recipe(recover_content))
+    restore_content = FTP.get_recipes_content_from_path(
+        restore_list_checked, BACKUP_FOLDER)
+    ret.extend(FTP.write_recipe(restore_content))
     return jsonify(ret)
 
 
