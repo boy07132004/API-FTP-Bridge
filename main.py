@@ -121,7 +121,7 @@ def recover():
         if recipe in recipe_already_backup:
             recover_list_checked.append(recipe)
         else:
-            ret.append(f"{recipe} not found")
+            ret.append(recipe + " not found")
 
     recover_content = FTP.get_recipes_content_from_path(
         recover_list_checked, BACKUP_FOLDER)

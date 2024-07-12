@@ -40,7 +40,7 @@ class ZM_FTP():
     @ftp_login
     def get_file_content(self, filename):
         file_content = []
-        self.ftp.retrlines(f'RETR {filename}', file_content.append)
+        self.ftp.retrlines('RETR ' + filename, file_content.append)
         return "\n".join(file_content)
 
     @ftp_login
@@ -68,10 +68,10 @@ class ZM_FTP():
 
                 if response.startswith('226'):
                     self.logger.info("File uploaded successfully.")
-                    ret.append(f"{filename} OK")
+                    ret.append(filename + " OK")
                 else:
-                    self.logger.error(f"Error uploading {filename}.")
-                    ret.append(f"{filename} failed")
+                    self.logger.error("Error uploading" + filename)
+                    ret.append(filename + " failed")
 
         self.ftp.cwd(self.root_path)
 
@@ -101,7 +101,7 @@ class ZM_FTP():
                 continue
 
             ret[recipe] = self.get_files_content(
-                [f"{recipe}.proc", f"{recipe}.proc1", f"{recipe}.hdr"], path
+                [recipe+".proc", recipe+".proc1", recipe+".hdr"], path
             )
 
         return ret
